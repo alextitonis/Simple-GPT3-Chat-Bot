@@ -14,8 +14,32 @@ class postgres:
                             password=envReader.getValue('PGPASSWORD'))
         self.cur = self.postgres_con.cursor()
     
-    def __login(username, password):
-        print()
+    def login(self, username, password):
+        if (username == '' or password == ''):
+            return False
         
-    def __register(username, password):
-        print()
+        query = """SELECT * FROM accounts WHERE username=%s AND password=%s"""
+        self.cur.execute(query, (username, password))
+        results = self.cur.fetchall()
+        return len(results) > 0
+    
+    def accountExists(self, username):
+        if (username == ''):
+            return True
+        
+        query = """SELECT * FROM accounts WHERE username=%s"""
+        self.cur.execute(query, (username))
+        results = self.cur.fetchall()
+        return len(results) > 0
+        
+    def register(self, username, password):
+        if (username == '' or password == ''):
+            return False
+        
+        if (self.accountExists(username, password) == True):
+            return False
+        
+        query = """INSERT INTO accounts(username, password) VALUES(%s, %s)"""
+        self.cur.execute(query, (username, password))
+        self.postgres_con.commit()
+        return True
